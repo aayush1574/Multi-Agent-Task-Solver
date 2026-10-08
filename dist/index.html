@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A collaborative workspace that plans complex objectives, dispatches specialist agents, and synthesizes their work.">
+  <title>Relay — Multi-Agent Task Solver</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23181715'/%3E%3Cpath d='M16 18h17c10 0 16 5 16 14S43 46 33 46H16V18Zm10 8v12h7c4 0 6-2 6-6s-2-6-6-6h-7Z' fill='%23f3efe6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Relay home">
+      <span class="brand-mark">R</span>
+      <span>Relay</span>
+    </a>
+    <div class="topbar-meta">
+      <span class="status"><i></i> Demo engine online</span>
+      <button class="icon-button" id="themeButton" type="button" aria-label="Toggle color theme">◐</button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <aside class="rail" aria-label="Task history">
+      <div class="eyebrow">Workspace / 01</div>
+      <h1>Multi-Agent<br>Task Solver</h1>
+      <p class="intro">Turn a broad objective into an executable plan, specialist work, and one clear answer.</p>
+
+      <section class="rail-section">
+        <div class="section-label">Recent runs</div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+
+      <div class="stack-tags" aria-label="Technology stack">
+        <span>FastAPI</span><span>LLMs</span><span>SQL</span><span>REST</span>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <section class="composer" aria-labelledby="composerTitle">
+        <div class="composer-head">
+          <div>
+            <div class="eyebrow">New objective</div>
+            <h2 id="composerTitle">What should the team solve?</h2>
+          </div>
+          <span class="mode-pill">Local demo</span>
+        </div>
+
+        <label class="sr-only" for="objectiveInput">Objective</label>
+        <textarea id="objectiveInput" rows="5" maxlength="700" placeholder="Describe a complex objective, including the outcome you need…">Analyze our quarterly sales performance, identify the three biggest growth opportunities, and recommend a 30-day action plan.</textarea>
+
+        <div class="example-row" aria-label="Example objectives">
+          <span>Try:</span>
+          <button class="example" type="button" data-prompt="Compare three launch markets for a productivity app and recommend the best entry strategy.">Market entry</button>
+          <button class="example" type="button" data-prompt="Analyze customer support data, find recurring issues, and propose a prioritized improvement plan.">Support analysis</button>
+          <button class="example" type="button" data-prompt="Research competitors, compare positioning, and create a concise product differentiation brief.">Competitor brief</button>
+        </div>
+
+        <div class="composer-actions">
+          <div class="tool-picks" aria-label="Available tools">
+            <label><input type="checkbox" id="sqlTool" checked> SQL</label>
+            <label><input type="checkbox" id="apiTool" checked> REST API</label>
+          </div>
+          <button id="runButton" class="run-button" type="button"><span>Run objective</span><kbd>⌘ ↵</kbd></button>
+        </div>
+      </section>
+
+      <section id="runPanel" class="run-panel" aria-live="polite">
+        <div class="run-header">
+          <div>
+            <div class="eyebrow">Execution / <span id="runId">R-001</span></div>
+            <h2 id="runTitle">Ready when you are.</h2>
+          </div>
+          <div id="runState" class="run-state idle"><span></span> Idle</div>
+        </div>
+
+        <div class="progress-track"><div id="progressBar"></div></div>
+
+        <div class="run-grid">
+          <div>
+            <h3>Agent activity</h3>
+            <div id="agentList" class="agent-list">
+              <article class="agent-card" data-agent="Planner">
+                <div class="agent-index">01</div><div><strong>Planner</strong><p>Breaks the objective into a dependency-aware plan.</p></div><span class="agent-status">Queued</span>
+              </article>
+              <article class="agent-card" data-agent="Researcher">
+                <div class="agent-index">02</div><div><strong>Researcher</strong><p>Collects evidence from the enabled data sources.</p></div><span class="agent-status">Queued</span>
+              </article>
+              <article class="agent-card" data-agent="Analyst">
+                <div class="agent-index">03</div><div><strong>Analyst</strong><p>Finds patterns, risks, and decision-relevant signals.</p></div><span class="agent-status">Queued</span>
+              </article>
+              <article class="agent-card" data-agent="Synthesizer">
+                <div class="agent-index">04</div><div><strong>Synthesizer</strong><p>Combines the work into one actionable response.</p></div><span class="agent-status">Queued</span>
+              </article>
+            </div>
+          </div>
+
+          <div class="output-column">
+            <h3>Team output</h3>
+            <div id="outputCard" class="output-card empty">
+              <div class="empty-mark">R</div>
+              <p>Your team’s final answer will appear here.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer><span>Built for complex work.</span><span>Plan · Delegate · Synthesize</span></footer>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
