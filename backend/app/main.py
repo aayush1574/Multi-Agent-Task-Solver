@@ -45,7 +45,12 @@ async def health() -> dict[str, str]:
 @app.post("/api/runs", response_model=RunResponse, status_code=202)
 async def create_run(request: ObjectiveRequest) -> RunResponse:
     run = orchestrator.create(request)
-    orchestrator.start(run.id, request)
+    # Serverless platforms may freeze the process as soon as a response is
+    # returned, so finish short demo runs inside the request on Vercel.
+    if os.getenv("VERCEL"):
+        await orchestrator.execute(run.id, request)
+    else:
+        orchestrator.start(run.id, request)
     return run
 
 

@@ -23,3 +23,13 @@ def test_create_run() -> None:
 def test_missing_run() -> None:
     response = client.get("/api/runs/R-NOTFOUND")
     assert response.status_code == 404
+
+
+def test_serverless_run_completes_before_response(monkeypatch) -> None:
+    monkeypatch.setenv("VERCEL", "1")
+    response = client.post(
+        "/api/runs",
+        json={"objective": "Create a concise market validation plan for a new product."},
+    )
+    assert response.status_code == 202
+    assert response.json()["status"] == "completed"

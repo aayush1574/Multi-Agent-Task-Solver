@@ -1,0 +1,9 @@
+.git
+.github
+.pytest_cache
+backend/tests
+backend/**/__pycache__
+backend/**/*.pyc
+Dockerfile
+.dockerignore
+work

@@ -59,6 +59,17 @@ Open `http://localhost:8000`. The container runs as a non-root user and exposes 
 
 For a production LLM integration, replace the deterministic worker implementations, store provider keys as deployment secrets, use a durable run store such as PostgreSQL, and move long-running work to a queue-backed worker.
 
+## Deploy to Vercel
+
+The repository includes a root FastAPI entrypoint and runtime dependencies for Vercel. Import the GitHub repository in Vercel or deploy from the project root:
+
+```powershell
+npx vercel@latest
+npx vercel@latest --prod
+```
+
+Vercel serves the interface and API from one deployment. Short orchestration runs complete inside the request so they are reliable in a serverless runtime.
+
 ## Test
 
 ```powershell
