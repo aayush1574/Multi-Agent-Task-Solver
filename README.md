@@ -44,6 +44,21 @@ API docs are available at `http://127.0.0.1:8000/docs`.
 
 The current orchestrator is deterministic so the repository runs immediately. Replace the worker bodies in `backend/app/orchestrator.py` with your preferred model and tool adapters for production.
 
+The frontend automatically uses the API when both are served together. If the API is unavailable, it switches to its credential-free local demo, which is also what powers the static hosted preview.
+
+## Production container
+
+Build and run the complete interface and API as one service:
+
+```powershell
+docker build -t relay .
+docker run --rm -p 8000:8000 --env-file .env relay
+```
+
+Open `http://localhost:8000`. The container runs as a non-root user and exposes a health check at `/health`.
+
+For a production LLM integration, replace the deterministic worker implementations, store provider keys as deployment secrets, use a durable run store such as PostgreSQL, and move long-running work to a queue-backed worker.
+
 ## Test
 
 ```powershell

@@ -18,3 +18,8 @@ def test_create_run() -> None:
     response = client.post("/api/runs", json={"objective": "Analyze quarterly sales performance and propose actions."})
     assert response.status_code == 202
     assert response.json()["status"] in {"queued", "running"}
+
+
+def test_missing_run() -> None:
+    response = client.get("/api/runs/R-NOTFOUND")
+    assert response.status_code == 404

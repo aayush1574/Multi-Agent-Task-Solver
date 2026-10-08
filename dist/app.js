@@ -45,6 +45,52 @@ function renderResult(run) {
     <div class="tool-note">Evidence path: ${escapeHTML(run.result.tools.length ? run.result.tools.join(' + ') : 'reasoning only')} · Demo data</div>`;
 }
 
+function renderApiResult(run) {
+  const recommendations = run.result?.recommendations || [];
+  return {
+    ...run,
+    result: {
+      summary: run.result?.summary || 'The team completed the objective.',
+      findings: recommendations.map((text, index) => [`Recommendation ${index + 1}`, text]),
+      tools: [run.result?.tools || 'reasoning only']
+    }
+  };
+}
+
+async function tryApiRun(objective, tools, cards) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2500);
+  try {
+    const response = await fetch('/api/runs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ objective, use_sql: tools.includes('SQL'), use_rest_api: tools.includes('REST API') }),
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) return null;
+    let run = await response.json();
+    runId.textContent = run.id;
+    for (let attempt = 0; attempt < 80 && !['completed', 'failed'].includes(run.status); attempt += 1) {
+      run.steps.forEach((step, index) => {
+        cards[index].className = `agent-card ${step.status === 'completed' ? 'done' : step.status === 'running' ? 'active' : ''}`;
+        cards[index].querySelector('.agent-status').textContent = step.status === 'completed' ? 'Done' : step.detail;
+      });
+      const done = run.steps.filter(step => step.status === 'completed').length;
+      progressBar.style.width = `${Math.max(8, done * 24)}%`;
+      await sleep(250);
+      const poll = await fetch(`/api/runs/${encodeURIComponent(run.id)}`);
+      if (!poll.ok) throw new Error('Run polling failed');
+      run = await poll.json();
+    }
+    if (run.status !== 'completed') throw new Error('Run did not complete');
+    return renderApiResult(run);
+  } catch (_) {
+    clearTimeout(timeout);
+    return null;
+  }
+}
+
 function loadRun(run) {
   runId.textContent = run.id;
   runTitle.textContent = shorten(run.objective, 78);
@@ -82,8 +128,13 @@ async function runObjective() {
 
   const cards = [...document.querySelectorAll('.agent-card')];
   cards.forEach(card => { card.className = 'agent-card'; card.querySelector('.agent-status').textContent = 'Queued'; });
+  const apiRun = await tryApiRun(objective, tools, cards);
+  if (apiRun) {
+    activeRun = apiRun;
+    cards.forEach(card => { card.className = 'agent-card done'; card.querySelector('.agent-status').textContent = 'Done'; });
+  }
   const labels = ['Structuring objective', tools.length ? `Checking ${tools.join(' + ')}` : 'Reviewing context', 'Testing the evidence', 'Writing decision brief'];
-  for (let i = 0; i < cards.length; i += 1) {
+  for (let i = 0; !apiRun && i < cards.length; i += 1) {
     cards[i].classList.add('active');
     cards[i].querySelector('.agent-status').textContent = labels[i];
     progressBar.style.width = `${18 + i * 23}%`;
